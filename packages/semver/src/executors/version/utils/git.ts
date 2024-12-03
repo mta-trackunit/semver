@@ -2,10 +2,8 @@ import * as gitRawCommits from 'git-raw-commits';
 import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
 import {
   catchError,
-  delay,
   last,
   map,
-  retryWhen,
   scan,
   startWith,
   switchMap,
@@ -174,14 +172,14 @@ export function createTag({
   commitHash,
   commitMessage,
   projectName,
-  retryCounter,
+  retryTagCounter,
 }: {
   dryRun: boolean;
   tag: string;
   commitHash: string;
   commitMessage: string;
   projectName: string;
-  retryCounter: number;
+  retryTagCounter: number;
 }): Observable<string> {
   if (dryRun) {
     return EMPTY;
@@ -206,7 +204,7 @@ export function createTag({
           );
         }
         if (retriesLeft > 0) {
-          return timer(Math.pow(2, retryCounter - retriesLeft) * 1000).pipe(
+          return timer(Math.pow(2, retryTagCounter - retriesLeft) * 1000).pipe(
             switchMap(() => attemptTagCreation(retriesLeft - 1)),
           );
         }
@@ -216,7 +214,7 @@ export function createTag({
     );
   };
 
-  return attemptTagCreation(retryCounter).pipe(
+  return attemptTagCreation(retryTagCounter).pipe(
     map(() => tag),
     logStep({
       step: 'tag_success',

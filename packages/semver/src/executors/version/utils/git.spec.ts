@@ -1,5 +1,5 @@
 import * as gitRawCommits from 'git-raw-commits';
-import { lastValueFrom, of, tap, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { PassThrough } from 'stream';
 import * as cp from '../../common/exec';
 import {
@@ -269,7 +269,7 @@ describe('git', () => {
           tag: 'project-a-1.0.0',
           commitMessage: 'chore(release): 1.0.0',
           projectName: 'p',
-          retryCounter: 0,
+          retryTagCounter: 0,
         }),
       );
 
@@ -294,7 +294,7 @@ describe('git', () => {
         commitHash: '123',
         commitMessage: 'chore(release): 1.0.0',
         projectName: 'p',
-        retryCounter: 0,
+        retryTagCounter: 0,
       }).subscribe({
         complete: () => {
           expect(cp.exec).not.toBeCalled();
@@ -318,7 +318,7 @@ describe('git', () => {
         commitHash: '123',
         commitMessage: 'chore(release): 1.0.0',
         projectName: 'p',
-        retryCounter: 0,
+        retryTagCounter: 0,
       }).subscribe({
         next: expect.fail,
         complete: () => expect.fail('should not complete'),
