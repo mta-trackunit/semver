@@ -1,6 +1,15 @@
 import * as gitRawCommits from 'git-raw-commits';
-import { EMPTY, Observable, throwError } from 'rxjs';
-import { catchError, last, map, scan, startWith } from 'rxjs/operators';
+import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
+import {
+  catchError,
+  delay,
+  last,
+  map,
+  retryWhen,
+  scan,
+  startWith,
+  switchMap,
+} from 'rxjs/operators';
 import { exec } from '../../common/exec';
 import { logStep, _logStep } from './logger';
 
@@ -137,7 +146,8 @@ export function addToStage({
   if (paths.length === 0) {
     return EMPTY;
   } else if (skipStage) {
-    return EMPTY;
+    // skip stage and return like this to ensure the chain will continue.
+    return of(undefined);
   }
 
   const gitAddOptions = [...(dryRun ? ['--dry-run'] : []), ...paths];
@@ -164,29 +174,49 @@ export function createTag({
   commitHash,
   commitMessage,
   projectName,
+  retryCounter,
 }: {
   dryRun: boolean;
   tag: string;
   commitHash: string;
   commitMessage: string;
   projectName: string;
+  retryCounter: number;
 }): Observable<string> {
   if (dryRun) {
     return EMPTY;
   }
-  return exec('git', ['tag', '-a', tag, commitHash, '-m', commitMessage]).pipe(
-    catchError((error) => {
-      if (/already exists/.test(error)) {
-        return throwError(
-          () =>
-            new Error(`Failed to tag "${tag}", this tag already exists.
-            This error occurs because the same version was previously created but the tag does not point to a commit referenced in your base branch.
-            Please delete the tag by running "git tag -d ${tag}", make sure the tag has been removed from the remote repository as well and run this command again.`),
-        );
-      }
 
-      return throwError(() => error);
-    }),
+  const attemptTagCreation = (retriesLeft: number): Observable<string> => {
+    return exec('git', [
+      'tag',
+      '-a',
+      tag,
+      commitHash,
+      '-m',
+      commitMessage,
+    ]).pipe(
+      catchError((error) => {
+        if (/already exists/.test(error)) {
+          return throwError(
+            () =>
+              new Error(`Failed to tag "${tag}", this tag already exists.
+              This error occurs because the same version was previously created but the tag does not point to a commit referenced in your base branch.
+              Please delete the tag by running "git tag -d ${tag}", make sure the tag has been removed from the remote repository as well and run this command again.`),
+          );
+        }
+        if (retriesLeft > 0) {
+          return timer(Math.pow(2, retryCounter - retriesLeft) * 1000).pipe(
+            switchMap(() => attemptTagCreation(retriesLeft - 1)),
+          );
+        }
+
+        return throwError(() => error);
+      }),
+    );
+  };
+
+  return attemptTagCreation(retryCounter).pipe(
     map(() => tag),
     logStep({
       step: 'tag_success',

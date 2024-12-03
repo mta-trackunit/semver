@@ -1,5 +1,5 @@
 import * as gitRawCommits from 'git-raw-commits';
-import { lastValueFrom, of, throwError } from 'rxjs';
+import { lastValueFrom, of, tap, throwError } from 'rxjs';
 import { PassThrough } from 'stream';
 import * as cp from '../../common/exec';
 import {
@@ -201,6 +201,21 @@ describe('git', () => {
       expect(cp.exec).not.toBeCalled();
     });
 
+    it('should skip add to git stage if skipStage is true but should continue the chain', async () => {
+      jest.spyOn(cp, 'exec').mockReturnValue(of('ok'));
+
+      const value = await lastValueFrom(
+        addToStage({
+          paths: ['packages/demo/file.txt', 'packages/demo/other-file.ts'],
+          dryRun: false,
+          skipStage: true,
+        }),
+      );
+
+      expect(cp.exec).not.toBeCalled();
+      expect(value).toEqual(undefined);
+    });
+
     it('should skip git add if paths argument is empty', async () => {
       jest.spyOn(cp, 'exec').mockReturnValue(of('ok'));
 
@@ -254,6 +269,7 @@ describe('git', () => {
           tag: 'project-a-1.0.0',
           commitMessage: 'chore(release): 1.0.0',
           projectName: 'p',
+          retryCounter: 0,
         }),
       );
 
@@ -278,6 +294,7 @@ describe('git', () => {
         commitHash: '123',
         commitMessage: 'chore(release): 1.0.0',
         projectName: 'p',
+        retryCounter: 0,
       }).subscribe({
         complete: () => {
           expect(cp.exec).not.toBeCalled();
@@ -301,6 +318,7 @@ describe('git', () => {
         commitHash: '123',
         commitMessage: 'chore(release): 1.0.0',
         projectName: 'p',
+        retryCounter: 0,
       }).subscribe({
         next: expect.fail,
         complete: () => expect.fail('should not complete'),

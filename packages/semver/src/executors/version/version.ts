@@ -113,6 +113,7 @@ export function versionWorkspace({
         commitHash,
         commitMessage,
         projectName,
+        retryCounter: 3,
       }),
     ),
   );
@@ -199,6 +200,7 @@ export function versionProject({
         commitHash,
         commitMessage,
         projectName,
+        retryCounter: 3,
       }),
     ),
   );
