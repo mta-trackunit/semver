@@ -26,6 +26,7 @@ export type Version =
 export interface CommonVersionOptions {
   tag: string;
   dryRun: boolean;
+  retryTagCounter: number;
   trackDeps: boolean;
   newVersion: string;
   noVerify: boolean;
@@ -52,6 +53,7 @@ export function versionWorkspace({
   tag,
   skipCommit,
   skipStage,
+  retryTagCounter,
   projectRoot,
   ...options
 }: {
@@ -73,6 +75,7 @@ export function versionWorkspace({
       projectName,
       skipCommit,
       skipStage,
+      retryTagCounter,
       tag,
       ...options,
     }),
@@ -113,7 +116,7 @@ export function versionWorkspace({
         commitHash,
         commitMessage,
         projectName,
-        retryCounter: 3,
+        retryTagCounter,
       }),
     ),
   );
@@ -130,6 +133,7 @@ export function versionProject({
   projectName,
   skipCommit,
   skipStage,
+  retryTagCounter,
   tag,
   ...options
 }: {
@@ -145,6 +149,7 @@ export function versionProject({
     dryRun,
     skipCommit,
     skipStage,
+    retryTagCounter,
     noVerify,
     tagPrefix,
     tag,
@@ -200,7 +205,7 @@ export function versionProject({
         commitHash,
         commitMessage,
         projectName,
-        retryCounter: 3,
+        retryTagCounter,
       }),
     ),
   );

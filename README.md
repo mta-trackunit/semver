@@ -87,6 +87,7 @@ nx run workspace:version [...options]
 | **`--skipCommitTypes`**      | `string[]`         | `[]`        | treat commits with specified types as non invoking version bump ([details](https://github.com/jscutlery/semver#skipping-release-for-specific-types-of-commits)) |
 | **`--skipCommit`**           | `boolean`          | `false`     | skips generating a new commit, leaves all changes in index, tag would be put on last commit ([details](https://github.com/jscutlery/semver#skipping-commit))    |
 | **`--skipStage`**            | `boolean`          | `false`     | skips add to git stage, useful when you want to run nx cmd in parallel ([details](https://github.com/jscutlery/semver#skipping-stage))                          |
+| **`--retryTagCounter`**      | `number`           | `0`         | Allows to retry creating a tag if you are running in parallel it might fail getting a lock ([details](https://github.com/jscutlery/semver#retry-tag-counter))   |
 | **`--commitMessageFormat`**  | `string`           | `undefined` | format the auto-generated message commit ([details](https://github.com/jscutlery/semver#commit-message-customization))                                          |
 | **`--preset`**               | `string \| object` | `'angular'` | customize Conventional Changelog options ([details](https://github.com/jscutlery/semver#customizing-conventional-changelog))                                    |
 | **`--commitParserOptions`**  | `object`           | `undefined` | customize the commit parserConfig ([details](https://github.com/jscutlery/semver#customizing-the-commit-parser))                                                |
@@ -288,6 +289,10 @@ The tag for the new version would be put on the last existing commit.
 ### Skipping Stage
 
 In case you want to run nx cmd in parallel, you can provide the `--skipStage` flag and it will not add to git stage - since that requires a git-lock, this has to be used together with `--skipCommit` and `--skipTag` and not with `--push`, all for the same reason they will require a git-lock.
+
+### Retry tag counter
+
+If you are running in parallel it might fail getting a git-lock, you can provide the number of retries using `--retryTagCounter=3` flag to retry creating a tag 3 times.
 
 ### Triggering executors post-release
 

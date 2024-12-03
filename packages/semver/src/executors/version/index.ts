@@ -49,6 +49,7 @@ export default async function version(
     skipCommitTypes,
     skipCommit,
     skipStage,
+    retryTagCounter,
     commitParserOptions,
   } = _normalizeOptions(options);
 
@@ -137,6 +138,7 @@ export default async function version(
         dependencyUpdates,
         skipCommit,
         skipStage,
+        retryTagCounter,
         workspace: context.projectsConfigurations,
       };
 
@@ -244,6 +246,7 @@ function _normalizeOptions(options: VersionBuilderSchema) {
     commitParserOptions: options.commitParserOptions,
     skipCommit: options.skipCommit as boolean,
     skipStage: options.skipStage as boolean,
+    retryTagCounter: (options.retryTagCounter as number) || 0,
     preset: (options.preset === 'conventional'
       ? 'conventionalcommits'
       : options.preset || 'angular') as PresetOpt,

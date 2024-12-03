@@ -34,6 +34,7 @@ export interface VersionBuilderSchema {
   allowEmptyRelease?: boolean;
   skipCommitTypes?: string[];
   skipStage?: boolean;
+  retryTagCounter?: number;
   commitMessageFormat?: string;
   preset: PresetOpt | 'conventional'; // @TODO: Remove 'conventional' in the next major release.
   commitParserOptions?: CommitParserOptions;
